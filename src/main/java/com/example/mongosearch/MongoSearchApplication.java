@@ -15,6 +15,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
 
 @SpringBootApplication
 @Slf4j
@@ -68,12 +70,8 @@ public class MongoSearchApplication {
             MongoCollection<BsonDocument> collection = database.getCollection(indexName, BsonDocument.class);
 
             // setup the indexes for this client
-            BsonDocument dateIndex = new BsonDocument("addDate", new BsonInt32(1));
-            collection.createIndex(dateIndex);
-            for(String key : createJsonService.getAttributeKeys()) {
-                BsonDocument keyIndex = new BsonDocument(key, new BsonInt32(1));
-                collection.createIndex(keyIndex);
-            }
+            createOneIndex(collection, createJsonService.getAttributeKeys());
+//            createInidividualIndexes(collection, createJsonService.getAttributeKeys());
 
             ObjectMapper mapper = new ObjectMapper();
             for (int x = 0; x < totalCount; x = x + batchSize) {
@@ -103,13 +101,33 @@ public class MongoSearchApplication {
                 // call to mongo to bulk-insert
                 collection.insertMany(batchDocuments);
 
-                log.info(String.format("Added objects to ES: Total=%d, BatchSize=%s",
+                log.info(String.format("Added objects to MongoDB: Total=%d, BatchSize=%s",
                         x + thisBatchSize,
                         thisBatchSize));
            }
 
             log.info("Added " + totalCount + " documents in " + (System.currentTimeMillis()-starTime)/1000 + " sec(s)");
         };
+    }
+
+    public void createOneIndex(MongoCollection<BsonDocument> collection, Set<String> keys) {
+        BsonDocument keyIndexes = new BsonDocument();
+        keyIndexes.put("addDate", new BsonInt32(1));
+        for(String key : keys) {
+            keyIndexes.put(key, new BsonInt32(1));
+        }
+        collection.createIndex(keyIndexes);
+    }
+
+    public void createInidividualIndexes(MongoCollection<BsonDocument> collection, Set<String> keys) {
+
+        BsonDocument dateIndex = new BsonDocument("addDate", new BsonInt32(1));
+        collection.createIndex(dateIndex);
+
+        for(String key : keys) {
+            BsonDocument keyIndex = new BsonDocument(key, new BsonInt32(1));
+            collection.createIndex(keyIndex);
+        }
     }
 
     public static void main(String[] args) {
