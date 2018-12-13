@@ -15,7 +15,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Set;
 
 @SpringBootApplication
@@ -70,7 +69,8 @@ public class MongoSearchApplication {
             MongoCollection<BsonDocument> collection = database.getCollection(indexName, BsonDocument.class);
 
             // setup the indexes for this client
-            createOneIndex(collection, createJsonService.getAttributeKeys());
+            createIndexesWithDate(collection, createJsonService.getAttributeKeys());
+//            createOneIndex(collection, createJsonService.getAttributeKeys());
 //            createInidividualIndexes(collection, createJsonService.getAttributeKeys());
 
             ObjectMapper mapper = new ObjectMapper();
@@ -82,14 +82,7 @@ public class MongoSearchApplication {
                 for (int i = 0; i < thisBatchSize; i++) {
 
                     SearchMetadata searchMetadata = createJsonService.generateRandomMetadata(indexName);
-                    BsonDocument document = new BsonDocument();
-                    document.put("_id", new BsonString(searchMetadata.getDocumentId()));
-                    document.put("addDate", new BsonDateTime(searchMetadata.getAddDate().getTime()));
-                    for (String key: searchMetadata.getAttributes().keySet()) {
-                        document.put(key, new BsonString(searchMetadata.getAttributes().get(key)));
-                    }
-
-                    batchDocuments.add(document);
+                    batchDocuments.add(toBsonDocument(searchMetadata));
 
                     // write some json files to disk
                     if (generateJson) {
@@ -110,23 +103,43 @@ public class MongoSearchApplication {
         };
     }
 
-    public void createOneIndex(MongoCollection<BsonDocument> collection, Set<String> keys) {
+    private BsonDocument toBsonDocument(SearchMetadata searchMetadata) {
+        BsonDocument document = new BsonDocument();
+        document.put("_id", new BsonString(searchMetadata.getDocumentId()));
+        document.put("date", new BsonDateTime(searchMetadata.getDate().getTime()));
+        document.put("totalPages", new BsonInt32(searchMetadata.getTotalPages()));
+
+        for (String key: searchMetadata.getAttributes().keySet()) {
+            document.put(key, new BsonString(searchMetadata.getAttributes().get(key)));
+        }
+        return document;
+    }
+
+    private void createOneIndex(MongoCollection<BsonDocument> collection, Set<String> keys) {
         BsonDocument keyIndexes = new BsonDocument();
-        keyIndexes.put("addDate", new BsonInt32(1));
+        keyIndexes.put("date", new BsonInt32(1));
         for(String key : keys) {
             keyIndexes.put(key, new BsonInt32(1));
         }
         collection.createIndex(keyIndexes);
     }
 
-    public void createInidividualIndexes(MongoCollection<BsonDocument> collection, Set<String> keys) {
-
-        BsonDocument dateIndex = new BsonDocument("addDate", new BsonInt32(1));
+    private void createInidividualIndexes(MongoCollection<BsonDocument> collection, Set<String> keys) {
+        BsonDocument dateIndex = new BsonDocument("date", new BsonInt32(1));
         collection.createIndex(dateIndex);
 
         for(String key : keys) {
             BsonDocument keyIndex = new BsonDocument(key, new BsonInt32(1));
             collection.createIndex(keyIndex);
+        }
+    }
+
+    private void createIndexesWithDate(MongoCollection<BsonDocument> collection, Set<String> keys) {
+        for(String key : keys) {
+            BsonDocument index = new BsonDocument();
+            index.append("date", new BsonInt32(1));
+            index.append(key, new BsonInt32(1));
+            collection.createIndex(index);
         }
     }
 

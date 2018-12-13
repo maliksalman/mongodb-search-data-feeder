@@ -14,6 +14,7 @@ import java.util.Map;
 public class SearchMetadata {
     private String indexId;
     private String documentId;
-    private Date addDate;
+    private Date date;
     private Map<String, String> attributes;
+    private int totalPages;
 }

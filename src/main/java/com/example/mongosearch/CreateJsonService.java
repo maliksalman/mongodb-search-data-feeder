@@ -6,7 +6,7 @@ public class CreateJsonService {
 
     private static final String[] POSSIBLE_ATTRIBUTE_KEYS = new String[] {
         "accountNumber", "accountType", "residentId", "externalId", "recipientName",
-        "cardId", "taxId", "statementId", "residentId"
+        "cardId", "taxId", "statementId", "residentId", "lastName", "firstName"
     };
     private static final int MILLIS_IN_YEAR = 1000 * 60 * 60 * 24 * 365;
     private static final String[] DOCUMENT_TYPES = { "statement", "eob", "idcard", "summary" };
@@ -30,8 +30,9 @@ public class CreateJsonService {
         Date date = new Date(System.currentTimeMillis() - random.nextInt(MILLIS_IN_YEAR));
         return  SearchMetadata.builder().documentId(UUID.randomUUID().toString())
                                         .indexId(indexId)
-                                        .addDate(date)
+                                        .date(date)
                                         .attributes(randomAttributes())
+                                        .totalPages(Math.max(1, random.nextInt(10)))
                                         .build();
     }
 
