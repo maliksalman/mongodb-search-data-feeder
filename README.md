@@ -1,20 +1,20 @@
-## ElasticSearch Feeder
+## MongoDB Feeder
 
-Feeds an elastic-search index with some randomly generated data
+Feeds a MongoDb collection with some randomly generated data - intended for search
 
-### ElasticSearch in docker
+### MongoDB in docker
 
 For testing purposes, start a single node elastic-search cluster in docker:
 
 ```
-docker run -p 9200:9200 -p 9300:9300 -d --rm --name elasticsearch -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.4.2
+docker run --name mongo --rm -d -p 27017:27017 mongo:3.2 --smallfiles
 
 ```
 
 to stop the container
 
 ```
-docker stop elasticsearch
+docker stop mongo
 ```
 
 ### Adding data to the cluster
@@ -23,5 +23,5 @@ The below commands will add 100,000 documents to the "myindex" with a batch-size
 
 ```
 ./gradlew clean build
-java -jar build/libs/elastic-search-0.0.1-SNAPSHOT.jar localhost:9200 100000 myindex 5000
+java -jar build/libs/mongodb-search-0.0.1-SNAPSHOT.jar localhost 100000 myindex 5000
 ```
