@@ -23,5 +23,5 @@ The below commands will add 100,000 documents to the "myindex" with a batch-size
 
 ```
 ./gradlew clean build
-java -jar build/libs/mongodb-search-0.0.1-SNAPSHOT.jar localhost 100000 myindex 5000
+java -jar build/libs/mongodb-search-data-feeder-0.0.1-SNAPSHOT.jar localhost 100000 myindex 5000
 ```
