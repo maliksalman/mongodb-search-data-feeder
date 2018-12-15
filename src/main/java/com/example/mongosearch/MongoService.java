@@ -26,7 +26,6 @@ public class MongoService {
 	public void openCollection(String collectionName) {
 		MongoClient client = new MongoClient(mongoHost);
 		MongoDatabase database = client.getDatabase(dbName);
-		database.createCollection(collectionName);
 		collection = database.getCollection(collectionName, BsonDocument.class);
 	}
 
