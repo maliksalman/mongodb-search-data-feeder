@@ -13,14 +13,12 @@ public class CreateJsonService {
 
     private Random random = new Random();
     private Set<String> attributeKeys;
-    private int total;
     private String[] possibleValues;
 
     private GregorianCalendar gregorianCalendar;
     private long startTime;
 
     public CreateJsonService(int total) {
-        this.total = total;
         this.gregorianCalendar = new GregorianCalendar();
         this.startTime = System.currentTimeMillis();
 
