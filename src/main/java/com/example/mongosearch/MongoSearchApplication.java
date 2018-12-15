@@ -29,15 +29,13 @@ public class MongoSearchApplication {
 
         return args -> {
 
-            String mongoHost = args[0];
-            String collectionName = args[2];
-            CreateJsonService createJsonService = new CreateJsonService();
+            long starTime = System.currentTimeMillis();
 
+            String mongoHost = args[0];
             int totalCount = Integer.parseInt(args[1]);
+            String collectionName = args[2];
             int batchSize = Integer.parseInt(args[3]);
             boolean generateJson = "true".equals(args.length >= 5 ? args[4] : "false");
-
-            long starTime = System.currentTimeMillis();
 
             File baseDir = null;
             if (generateJson) {
@@ -52,6 +50,7 @@ public class MongoSearchApplication {
             service.openCollection(collectionName);
 
             // setup the indexes for this client
+            CreateJsonService createJsonService = new CreateJsonService(totalCount);
             service.createIndexes(createJsonService.getAttributeKeys());
 
             ObjectMapper mapper = new ObjectMapper();

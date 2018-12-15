@@ -8,17 +8,34 @@ public class CreateJsonService {
         "accountNumber", "accountType", "residentId", "externalId", "recipientName",
         "cardId", "taxId", "statementId", "residentId", "lastName", "firstName"
     };
-    private static final int MILLIS_IN_YEAR = 1000 * 60 * 60 * 24 * 365;
+    private static final long MILLIS_IN_YEAR = 1000 * 60 * 60 * 24 * 365;
     private static final String[] DOCUMENT_TYPES = { "statement", "eob", "idcard", "summary" };
 
     private Random random = new Random();
     private Set<String> attributeKeys;
+    private int total;
+    private String[] possibleValues;
 
-    public CreateJsonService() {
+    private GregorianCalendar gregorianCalendar;
+    private long startTime;
+
+    public CreateJsonService(int total) {
+        this.total = total;
+        this.gregorianCalendar = new GregorianCalendar();
+        this.startTime = System.currentTimeMillis();
+
+        // pick the random keys
         this.attributeKeys = new HashSet<>();
         int keysCount = Math.max(POSSIBLE_ATTRIBUTE_KEYS.length/2, random.nextInt(POSSIBLE_ATTRIBUTE_KEYS.length));
         for (int i = 0; i < keysCount; i++) {
             this.attributeKeys.add(POSSIBLE_ATTRIBUTE_KEYS[random.nextInt(POSSIBLE_ATTRIBUTE_KEYS.length)]);
+        }
+
+        // pick the possible values
+        int totalPossibleCount = total / 12;
+        possibleValues = new String[totalPossibleCount];
+        for (int i = 0; i < totalPossibleCount; i++) {
+            possibleValues[i] = UUID.randomUUID().toString();
         }
     }
 
@@ -27,7 +44,11 @@ public class CreateJsonService {
     }
 
     public SearchMetadata generateRandomMetadata(String indexId) {
-        Date date = new Date(System.currentTimeMillis() - random.nextInt(MILLIS_IN_YEAR));
+
+        gregorianCalendar.setTimeInMillis(startTime);
+        gregorianCalendar.add(Calendar.DAY_OF_YEAR, -random.nextInt(365));
+        Date date = gregorianCalendar.getTime();
+
         return  SearchMetadata.builder().documentId(UUID.randomUUID().toString())
                                         .indexId(indexId)
                                         .date(date)
@@ -42,7 +63,7 @@ public class CreateJsonService {
 
         // random attributes
         for (String key: attributeKeys) {
-            attributes.put(key, UUID.randomUUID().toString());
+            attributes.put(key, possibleValues[random.nextInt(possibleValues.length)]);
         }
 
         // common attributes

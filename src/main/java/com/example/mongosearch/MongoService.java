@@ -31,9 +31,9 @@ public class MongoService {
 	}
 
 	public void createIndexes(Set<String> keys) {
-		createIndexesWithDate(keys);
-//            createOneIndex(keys);
-//            createInidividualIndexes(keys);
+//		createIndexesWithDate(keys);
+//		createOneIndex(keys);
+		createInidividualIndexes(keys);
 	}
 
 	private void createOneIndex(Set<String> keys) {
