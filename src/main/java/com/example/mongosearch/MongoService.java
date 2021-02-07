@@ -1,6 +1,7 @@
 package com.example.mongosearch;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.BsonDateTime;
@@ -24,8 +25,15 @@ public class MongoService {
 	}
 
 	public void openCollection(String collectionName) {
-		MongoClient client = new MongoClient(mongoHost);
-		MongoDatabase database = client.getDatabase(dbName);
+		MongoDatabase database = null;
+		if (mongoHost.startsWith("mongodb://")) {
+			MongoClientURI mongoClientURI = new MongoClientURI(mongoHost);
+			MongoClient client = new MongoClient(mongoClientURI);
+			database = client.getDatabase(mongoClientURI.getDatabase());
+		} else {
+			MongoClient client = new MongoClient(mongoHost);
+			database = client.getDatabase(dbName);
+		}
 		collection = database.getCollection(collectionName, BsonDocument.class);
 	}
 
